@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Student Management System</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 30px 15px;
+            font-family: Arial, sans-serif;
+            background: #f0f4f8;
+            color: #222;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            padding: 30px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2563eb;
+        }
+
+        p {
+            text-align: center;
+            color: #555;
+        }
+
+        h2 {
+            margin-top: 30px;
+            color: #1e40af;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 7px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        input:focus {
+            outline: 2px solid #93c5fd;
+            border-color: #2563eb;
+        }
+
+        button {
+            margin-top: 18px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            background: #2563eb;
+            color: white;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 15px;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 13px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background: #2563eb;
+            color: white;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        .delete-btn {
+            margin: 0;
+            padding: 8px 12px;
+            background: #dc2626;
+        }
+
+        .delete-btn:hover {
+            background: #b91c1c;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 18px;
+            }
+
+            h1 {
+                font-size: 25px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>Student Management System</h1>
+
+        <p>Welcome to my BCA Student Management System.</p>
+
+        <h2>Add Student</h2>
+
+        <form id="studentForm">
+
+            <label for="studentName">Student Name:</label>
+            <input type="text" id="studentName"
+                   placeholder="Enter student name" required>
+
+            <label for="rollNumber">Roll Number:</label>
+            <input type="text" id="rollNumber"
+                   placeholder="Enter roll number" required>
+
+            <label for="course">Course:</label>
+            <input type="text" id="course"
+                   placeholder="Enter course name" required>
+
+            <button type="submit">Add Student</button>
+
+        </form>
+
+        <h2>Student List</h2>
+
+        <p id="studentCount">Total Students: 0</p>
+
+        <div class="table-wrapper">
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Roll Number</th>
+                        <th>Course</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody id="studentList">
+                    <tr>
+                        <td colspan="4" style="text-align:center;">
+                            No students added yet.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </div>
+
+    </div>
+
+    <script>
+        const studentForm = document.getElementById("studentForm");
+        const studentList = document.getElementById("studentList");
+        const studentCount = document.getElementById("studentCount");
+
+        let students = [];
+
+        studentForm.addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            const name = document.getElementById("studentName")
+                .value.trim();
+
+            const roll = document.getElementById("rollNumber")
+                .value.trim();
+
+            const course = document.getElementById("course")
+                .value.trim();
+
+            if (!name || !roll || !course) {
+                alert("Please fill in all details.");
+                return;
+            }
+
+            const duplicate = students.some(student =>
+                student.roll.toLowerCase() === roll.toLowerCase()
+            );
+
+            if (duplicate) {
+                alert("This roll number already exists!");
+                return;
+            }
+
+            students.push({ name, roll, course });
+
+            displayStudents();
+            studentForm.reset();
+        });
+
+        function displayStudents() {
+            studentList.replaceChildren();
+
+            if (students.length === 0) {
+                const row = document.createElement("tr");
+                const cell = document.createElement("td");
+
+                cell.colSpan = 4;
+                cell.textContent = "No students added yet.";
+                cell.style.textAlign = "center";
+
+                row.appendChild(cell);
+                studentList.appendChild(row);
+            }
+
+            students.forEach(function(student, index) {
+                const row = document.createElement("tr");
+
+                [student.name, student.roll, student.course]
+                    .forEach(function(value) {
+                        const cell = document.createElement("td");
+                        cell.textContent = value;
+                        row.appendChild(cell);
+                    });
+
+                const actionCell = document.createElement("td");
+                const deleteButton = document.createElement("button");
+
+                deleteButton.textContent = "Delete";
+                deleteButton.className = "delete-btn";
+
+                deleteButton.addEventListener("click", function() {
+                    students.splice(index, 1);
+                    displayStudents();
+                });
+
+                actionCell.appendChild(deleteButton);
+                row.appendChild(actionCell);
+                studentList.appendChild(row);
+            });
+
+            studentCount.textContent =
+                "Total Students: " + students.length;
+        }
+    </script>
+
+</body>
+</html>
+```
